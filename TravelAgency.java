@@ -22,26 +22,22 @@ public class TravelAgency {
 			Connection cnn=DBHandler.establishConnection();
 			
 			
-				PreparedStatement ps=cnn.prepareStatement("insert into Package_Details values(?,?,?,?,?)");
-				
-				PreparedStatement prs=cnn.prepareStatement("select * from Package_Details where pk_id=?");
-				
-			File file = new File("c.//abc.txt");
-			sc = new Scanner(file);
-			while (sc.hasNextLine()) {
+				PreparedStatement ps=cnn.prepareStatement("INSERT into Package_Details values(?,?,?,?,?)");
+				PreparedStatement prs=cnn.prepareStatement("SELECT * from Package_Details where pk_id=?");
+				File file = new File("c.//abc.txt");
+				sc = new Scanner(file);
+				while (sc.hasNextLine()) {
 
 				String st = sc.nextLine();
 				st = st.trim();
 				String arr[] = st.split(",");
-
 				String id = arr[0].trim();
 				if (validate(id)) {
 					String source_place = arr[1].trim();
 					String destination_place = arr[2].trim();
 					int days = Integer.parseInt(arr[3].trim());
 					double basic_fare = Double.parseDouble(arr[4].trim());
-					VarshPackage P1 = new VarshPackage(id, source_place, destination_place,days,
-							basic_fare);
+					VarshPackage P1 = new VarshPackage(id, source_place, destination_place,days,basic_fare);
 					P1.calculatePacakgeCost();
 					list.add(P1);
 					ps.setString(1, id);
@@ -53,52 +49,43 @@ public class TravelAgency {
 					ResultSet rs=prs.executeQuery();
 					if(!rs.next())ps.executeUpdate();
 					i++;
-				} else {
+				}
+				else {
 					throw new InvalidIdException();
 				}
 			}
 
-		} catch (FileNotFoundException ex) {
+		}
+		catch (FileNotFoundException ex) {
 			System.out.println("Problem in line number - " + i);
 			System.out.println(ex.getMessage());
 		} 
-
 		return list;
 	}
-
 	public boolean validate(String packageId) {
 		String regex = "[0-9]{3}[/]{1}[A-Z]{3}";
 		return packageId.matches(regex);
 	}
-
 	public List<VarshPackage> findPackagesWithMinimumNumberOfDays() {
 
 		List<VarshPackage> list = new ArrayList();
 		try {
 			Connection connection = DBHandler.establishConnection();
-
-			PreparedStatement ps = connection.prepareStatement("select * from Package_Details where no_of_days=(select MIN(no_of_days) from Package_Details)");
-            
-			ResultSet rs = ps.executeQuery();
-			while (rs.next()) {
-
+			PreparedStatement ps = connection.prepareStatement("SELECT * from Package_Details where number_of_days=(select MIN(no_of_days) from Package_Details)");
+			ResultSet result = ps.executeQuery();
+			while (result.next()) {
 				String id = rs.getString("pk_id");
 				String src = rs.getString("src_place");
 				String dstn = rs.getString("destn_place");
 				int days = rs.getInt("no_of_days");
 				double cost = rs.getDouble("pkg_cost");
-
 				VarshPackage v1 = new VarshPackage(id, src, dstn, days, 0);
 				v1.package_cost = cost;
 				list.add(v1);
-
 			}
-
 		} catch (Exception ex) {
 			System.out.println(ex.getMessage());
 		}
 		return list;
-
 	}
-
 }
